@@ -1,4 +1,4 @@
-using NuGet.Versioning;
+﻿using NuGet.Versioning;
 using Versionize.Versioning;
 
 namespace Versionize;
@@ -33,7 +33,9 @@ public class VersionIncrementStrategy
                 return version;
             }
 
-            return IsWithinPrereleaseVersionRange(version, versionImpact)?version.IncrementPrerelease(prereleaseLabel):nextVersion.AsPrerelease(prereleaseLabel, 0);
+            return IsWithinPrereleaseVersionRange(version, versionImpact)
+                ? version.IncrementPrerelease(prereleaseLabel)
+                : nextVersion.AsPrerelease(prereleaseLabel, 0);
         }
         else if (!version.IsPrerelease && isPrerelease)
         {
@@ -41,7 +43,10 @@ public class VersionIncrementStrategy
         }
         else if (version.IsPrerelease && !isPrerelease)
         {
-            return (IsWithinPrereleaseVersionRange(version, versionImpact)?version:nextVersion).AsRelease();
+            var prereleaseVersion = IsWithinPrereleaseVersionRange(version, versionImpact)
+                ? version
+                : nextVersion;
+            return prereleaseVersion.AsRelease();
         }
         else
         {
@@ -49,8 +54,10 @@ public class VersionIncrementStrategy
         }
     }
 
-    private bool IsWithinPrereleaseVersionRange(SemanticVersion version, VersionImpact versionImpact)  {
-        return versionImpact switch {
+    private static bool IsWithinPrereleaseVersionRange(SemanticVersion version, VersionImpact versionImpact)
+    {
+        return versionImpact switch
+        {
             VersionImpact.None => true,
             VersionImpact.Patch => true,
             VersionImpact.Minor => version.Patch == 0,
